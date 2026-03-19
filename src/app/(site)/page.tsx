@@ -3,16 +3,16 @@ import { CareerGrowthShowcase } from '@/components/site/CareerGrowthShowcase'
 import { FeaturedBrandsShowcase } from '@/components/site/FeaturedBrandsShowcase'
 import { SearchHero } from '@/components/site/SearchHero'
 import { getArticles } from '@/lib/content-api'
-import { getJobCategories, getJobs } from '@/lib/jobs-api'
+import { getCareerDirectories, getJobs } from '@/lib/jobs-api'
 import { mockArticles, mockProCompanies } from '@/lib/mock-data'
 
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const [featuredArticles, latestArticles, jobCategories, jobs] = await Promise.all([
+  const [featuredArticles, latestArticles, careerDirectories, jobs] = await Promise.all([
     getArticles({ featuredOnly: true, limit: 4 }),
     getArticles({ limit: 12 }),
-    getJobCategories(),
+    getCareerDirectories(),
     getJobs({ limit: 36 }),
   ])
 
@@ -20,10 +20,10 @@ export default async function HomePage() {
 
   return (
     <main>
-      <SearchHero categories={jobCategories.slice(0, 6)} featuredArticle={heroArticle} />
+      <SearchHero categories={careerDirectories} featuredArticle={heroArticle} />
       <BestJobsShowcase jobs={jobs} />
       <FeaturedBrandsShowcase companies={mockProCompanies} />
-      <CareerGrowthShowcase jobCategories={jobCategories} />
+      <CareerGrowthShowcase jobCategories={careerDirectories} />
     </main>
   )
 }

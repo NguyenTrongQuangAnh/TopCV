@@ -9,7 +9,7 @@ export const Articles: CollectionConfig = {
   slug: 'articles',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'contentType', 'category', 'jobCategory', '_status', 'publishedAt'],
+    defaultColumns: ['title', 'contentType', 'category', 'careerDirectory', '_status', 'publishedAt'],
     group: 'Content',
   },
   access: {
@@ -119,9 +119,9 @@ export const Articles: CollectionConfig = {
                   },
                 },
                 {
-                  name: 'jobCategory',
+                  name: 'careerDirectory',
                   type: 'relationship',
-                  relationTo: 'job-categories',
+                  relationTo: 'career_directory',
                   admin: {
                     condition: (data) => data?.contentType === 'job',
                   },

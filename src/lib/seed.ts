@@ -319,11 +319,19 @@ export const runSeed = async (payload: Payload) => {
     limit: 100,
   })
 
+  const existingArticlesBySlug = new Map<string, Record<string, any>>()
   const existingArticleSlugs = new Set(
     existingArticles.docs
-      .map((article) =>
-        typeof (article as Record<string, any>).slug === 'string' ? String((article as Record<string, any>).slug) : '',
-      )
+      .map((article) => {
+        const doc = article as Record<string, any>
+        const slug = typeof doc.slug === 'string' ? String(doc.slug) : ''
+
+        if (slug) {
+          existingArticlesBySlug.set(slug, doc)
+        }
+
+        return slug
+      })
       .filter(Boolean),
   )
 
@@ -352,25 +360,25 @@ export const runSeed = async (payload: Payload) => {
     existingArticleSlugs.add(article.slug)
   }
 
-  const existingJobCategories = await payload.find({
-    collection: 'job-categories',
+  const existingCareerDirectories = await payload.find({
+    collection: 'career_directory',
     limit: 100,
     sort: 'featuredOrder',
   })
 
-  const jobCategoryMap = new Map<string, number | string>()
+  const careerDirectoryMap = new Map<string, number | string>()
 
-  for (const category of existingJobCategories.docs as Array<Record<string, any>>) {
-    jobCategoryMap.set(String(category.slug), category.id)
+  for (const category of existingCareerDirectories.docs as Array<Record<string, any>>) {
+    careerDirectoryMap.set(String(category.slug), category.id)
   }
 
   for (const category of mockJobCategories) {
-    if (jobCategoryMap.has(category.slug)) {
+    if (careerDirectoryMap.has(category.slug)) {
       continue
     }
 
     const created = await payload.create({
-      collection: 'job-categories',
+      collection: 'career_directory',
       data: {
         name: category.name,
         slug: category.slug,
@@ -382,11 +390,23 @@ export const runSeed = async (payload: Payload) => {
       },
     })
 
-    jobCategoryMap.set(category.slug, created.id)
+    careerDirectoryMap.set(category.slug, created.id)
   }
 
   for (const job of mockJobDetails) {
     if (existingArticleSlugs.has(job.slug)) {
+      const existingJob = existingArticlesBySlug.get(job.slug)
+
+      if (existingJob?.id && !existingJob.careerDirectory) {
+        await payload.update({
+          collection: 'articles',
+          id: existingJob.id,
+          data: {
+            careerDirectory: careerDirectoryMap.get(job.categorySlug),
+          },
+        })
+      }
+
       continue
     }
 
@@ -400,7 +420,7 @@ export const runSeed = async (payload: Payload) => {
         displayId: job.displayId,
         excerpt: `${job.company} | ${job.salary} | ${job.location}`,
         content: job.description.join('\n\n'),
-        jobCategory: jobCategoryMap.get(job.categorySlug),
+        careerDirectory: careerDirectoryMap.get(job.categorySlug),
         company: job.company,
         salary: job.salary,
         location: job.location,

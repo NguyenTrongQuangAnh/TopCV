@@ -29,7 +29,7 @@ const formatJobDate = (value: unknown) => {
   }).format(date)
 }
 
-const normalizeJobCategory = (doc: Record<string, any>): MockJobCategory => ({
+const normalizeCareerDirectory = (doc: Record<string, any>): MockJobCategory => ({
   id: String(doc.id),
   name: String(doc.name),
   slug: String(doc.slug),
@@ -74,8 +74,10 @@ const normalizeJob = (doc: Record<string, any>): JobDetail | null => {
   }
 
   const categoryDoc =
-    doc.jobCategory && typeof doc.jobCategory === 'object' && doc.jobCategory.slug
-      ? (doc.jobCategory as Record<string, any>)
+    doc.careerDirectory && typeof doc.careerDirectory === 'object' && doc.careerDirectory.slug
+      ? (doc.careerDirectory as Record<string, any>)
+      : doc.jobCategory && typeof doc.jobCategory === 'object' && doc.jobCategory.slug
+        ? (doc.jobCategory as Record<string, any>)
       : null
   const routeId = String(doc.routeId ?? doc.displayId ?? doc.id ?? '').trim()
 
@@ -194,22 +196,24 @@ const filterMockJobs = (options: JobQueryOptions) =>
     }))
     .slice(0, options.limit ?? 12)
 
-export const getJobCategories = cache(async (): Promise<MockJobCategory[]> => {
+export const getCareerDirectories = cache(async (): Promise<MockJobCategory[]> => {
   try {
     const payload = await getPayloadClient()
     const result = await payload.find({
-      collection: 'job-categories',
+      collection: 'career_directory',
       depth: 0,
       limit: 24,
       sort: 'featuredOrder',
     })
 
-    const docs = result.docs.map((doc) => normalizeJobCategory(doc as Record<string, any>))
+    const docs = result.docs.map((doc) => normalizeCareerDirectory(doc as Record<string, any>))
     return docs.length ? docs : mockJobCategories
   } catch {
     return mockJobCategories
   }
 })
+
+export const getJobCategories = getCareerDirectories
 
 export const getJobs = cache(async (options: JobQueryOptions = {}): Promise<MockJob[]> => {
   const limit = options.limit ?? 12

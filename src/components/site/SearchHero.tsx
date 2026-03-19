@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
 import type { SiteArticle } from '@/lib/content'
@@ -28,12 +29,30 @@ export const SearchHero = ({ featuredArticle, categories }: SearchHeroProps) => 
   const [isLocationOpen, setIsLocationOpen] = useState(false)
   const [locationQuery, setLocationQuery] = useState('')
   const [selectedLocation, setSelectedLocation] = useState('')
+  const [directoryPage, setDirectoryPage] = useState(1)
   const locationRef = useRef<HTMLDivElement | null>(null)
 
   const filteredLocations = allLocations.filter((location) =>
     location.toLocaleLowerCase('vi').includes(locationQuery.trim().toLocaleLowerCase('vi')),
   )
-  const visibleCategories = categories.length ? categories.slice(0, 6).map((item) => item.name) : fallbackCategoryLabels
+  const directories = categories.length ? categories : fallbackCategoryLabels.map((name, index) => ({
+    id: `fallback-${index + 1}`,
+    name,
+    slug: name,
+    description: '',
+    iconLabel: '',
+    jobsLabel: '',
+    featuredOrder: index + 1,
+    accent: '#f41822',
+  }))
+  const directoryPages = Math.max(1, Math.ceil(directories.length / 6))
+  const visibleCategories = directories.slice((directoryPage - 1) * 6, directoryPage * 6)
+
+  useEffect(() => {
+    if (directoryPage > directoryPages) {
+      setDirectoryPage(directoryPages)
+    }
+  }, [directoryPage, directoryPages])
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -156,22 +175,35 @@ export const SearchHero = ({ featuredArticle, categories }: SearchHeroProps) => 
             <div className="rounded-[18px] bg-white shadow-card">
               <div className="space-y-0 px-[18px] py-[10px]">
                 {visibleCategories.map((item) => (
-                  <div
+                  <Link
                     className="flex min-h-[34px] items-center justify-between rounded-xl px-[2px] py-[6px] text-[15px] font-medium text-slate-700 transition hover:bg-slate-50 hover:text-brand-600"
-                    key={item}
+                    href={`/search?q=${encodeURIComponent(item.name)}`}
+                    key={item.id}
                   >
-                    <span className="truncate pr-3">{item}</span>
+                    <span className="truncate pr-3">{item.name}</span>
                     <span className="text-[23px] font-light leading-none text-slate-300">›</span>
-                  </div>
+                  </Link>
                 ))}
               </div>
               <div className="flex items-center justify-between border-t border-slate-100 px-[18px] py-[10px] text-[13px] text-slate-500">
-                <span className="font-medium">1/5</span>
+                <span className="font-medium">
+                  {directoryPage}/{directoryPages}
+                </span>
                 <div className="flex items-center gap-2">
-                  <button className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 text-[20px] leading-none text-slate-300" type="button">
+                  <button
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 text-[20px] leading-none text-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={directoryPage <= 1}
+                    onClick={() => setDirectoryPage((currentPage) => Math.max(1, currentPage - 1))}
+                    type="button"
+                  >
                     ‹
                   </button>
-                  <button className="flex h-7 w-7 items-center justify-center rounded-full border border-brand-400 text-[20px] leading-none text-brand-600" type="button">
+                  <button
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-brand-400 text-[20px] leading-none text-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={directoryPage >= directoryPages}
+                    onClick={() => setDirectoryPage((currentPage) => Math.min(directoryPages, currentPage + 1))}
+                    type="button"
+                  >
                     ›
                   </button>
                 </div>
