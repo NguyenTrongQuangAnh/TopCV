@@ -2,7 +2,7 @@ services:
   - type: web
     name: topcv-app
     runtime: docker
-    plan: starter
+    plan: free
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /
@@ -29,11 +29,6 @@ services:
         value: writer@topcv.local
       - key: PAYLOAD_EDITOR_PASSWORD
         sync: false
-    disk:
-      name: media
-      mountPath: /app/media
-      sizeGB: 1
-
 databases:
   - name: topcv-db
     plan: free
