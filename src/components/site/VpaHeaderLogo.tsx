@@ -14,6 +14,7 @@ export const VpaHeaderLogo = () => {
         height={245}
         priority
         src="/branding/vpa-header-logo.png"
+        unoptimized
         width={484}
       />
     </Link>
