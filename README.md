@@ -25,6 +25,27 @@ Website inspired by the visual rhythm of TopCV, but focused only on editorial co
 2. Run `docker compose up --build`
 3. Open `http://localhost:3000`
 
+## Deploy to Render
+
+This repo includes [render.yaml](/D:/Admin/Workspace/Codex/TopCV/render.yaml) for a Render Blueprint deployment.
+
+1. Push the latest code to GitHub
+2. In Render, choose `New` -> `Blueprint`
+3. Select this repository
+4. Render will detect `render.yaml` automatically
+5. Provide values for:
+   - `PAYLOAD_PUBLIC_SERVER_URL`
+   - `NEXT_PUBLIC_SITE_URL`
+   - `PAYLOAD_ADMIN_PASSWORD`
+   - `PAYLOAD_EDITOR_PASSWORD`
+6. Deploy
+
+Notes:
+
+- The app deploys from the existing `Dockerfile`
+- Uploaded files persist on a disk mounted at `/app/media`
+- Render provisions the PostgreSQL database from the Blueprint
+
 ## Seed behavior
 
 On first boot the app attempts to:

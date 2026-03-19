@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: topcv-app
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URI
+        fromDatabase:
+          name: topcv-db
+          property: connectionString
+      - key: PAYLOAD_SECRET
+        generateValue: true
+      - key: PAYLOAD_PUBLIC_SERVER_URL
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: PAYLOAD_ADMIN_EMAIL
+        value: admin@example.com
+      - key: PAYLOAD_ADMIN_PASSWORD
+        sync: false
+      - key: PAYLOAD_EDITOR_EMAIL
+        value: writer@topcv.local
+      - key: PAYLOAD_EDITOR_PASSWORD
+        sync: false
+    disk:
+      name: media
+      mountPath: /app/media
+      sizeGB: 1
+
+databases:
+  - name: topcv-db
+    plan: free
+    databaseName: topcv_content
+    user: payload
